@@ -8,8 +8,7 @@ public class Street {
     private String streetID;
     private double distance;
     private int legNumber;
-    private List<Street> startNeighbour;
-    private List<Street> endNeighbour;
+
 
     public Street() {
 
@@ -20,8 +19,6 @@ public class Street {
         this.end = end;
         this.streetID = streetID;
         this.distance = start.distanceTo(end);
-        this.startNeighbour = new ArrayList<>();
-        this.endNeighbour = new ArrayList<>();
         this.legNumber = legNumber;
     }
 
@@ -41,53 +38,64 @@ public class Street {
         return distance;
     }
 
-    public void addStartNeighbour(Street neighbourStreet) {
-        startNeighbour.add(neighbourStreet);
-    }
 
-    public void addEndNeighbour(Street neighbourStreet) {
-        endNeighbour.add(neighbourStreet);
-    }
 
-    /**
-     * @return
-     */
-//    public void getNeighbour(Street connectedStreet) {
-//
-//    }
-    public void getNeighbour(Street connectedStreet, ArrayList<ArrayList<Leg>> adjacencyList, ) {
+    public void addNeighbour(Street comparedStreet, ArrayList<ArrayList<Street>> adjacencyList ) {
+
         //if the intersection is between this street's start and compared street's start point
-        if (this.start.equals(connectedStreet.getStart())) {
-            Node Leg= new Leg()
+        if (this.start.equals(comparedStreet.getStart())) {
+
+            adjacencyList.get(this.legNumber).add(comparedStreet);
+            adjacencyList.get(comparedStreet.legNumber).add(this);
         }
         //if the intersection is between this street's start and compared street's end point
-        else if (this.start.equals(connectedStreet.getEnd())) {
-            this.addStartNeighbour(connectedStreet);
-            connectedStreet.addEndNeighbour(this);
+        else if (this.start.equals(comparedStreet.getEnd())) {
+            adjacencyList.get(this.legNumber).add(comparedStreet);
+            adjacencyList.get(comparedStreet.legNumber).add(this);
         }
         //if the intersection is between this street's end and compared street's start point
-        else if (this.end.equals(connectedStreet.getStart())) {
-            this.addEndNeighbour(connectedStreet);
-            connectedStreet.addStartNeighbour(this);
+        else if (this.end.equals(comparedStreet.getStart())) {
+            adjacencyList.get(this.legNumber).add(comparedStreet);
+            adjacencyList.get(comparedStreet.legNumber).add(this);
         }
         //if the intersection is between this street's end and compared street's end point
-        else if (this.end.equals(connectedStreet.getEnd())) {
-            this.addEndNeighbour(connectedStreet);
-            connectedStreet.addEndNeighbour(this);
+        else if (this.end.equals(comparedStreet.getEnd())) {
+            adjacencyList.get(this.legNumber).add(comparedStreet);
+            adjacencyList.get(comparedStreet.legNumber).add(this);
         }
-//    }
+    }
+    public int checkNeighbour(Street comparedStreet, ArrayList<ArrayList<Street>> adjacencyList ) {
+        /* counts common intersection. If,
+        commonPoint=0, comparedStreet isn't connected to this street
+        commonPoint=1, comparedStreet is connected to this street
+        commontPoint>1, the same start and end point is given with different name
+         */
+        int commonPoint=0;
 
-    public List<Street> getStartNeighbour() {
-        return startNeighbour;
+        //if the intersection is between this street's start and compared street's start point
+        if (this.start.equals(comparedStreet.getStart())) {
+
+            commonPoint++;
+        }
+        //if the intersection is between this street's start and compared street's end point
+        if (this.start.equals(comparedStreet.getEnd())) {
+            commonPoint++;
+        }
+        //if the intersection is between this street's end and compared street's start point
+        else if (this.end.equals(comparedStreet.getStart())) {
+            commonPoint++;
+        }
+        //if the intersection is between this street's end and compared street's end point
+        else if (this.end.equals(comparedStreet.getEnd())) {
+           commonPoint++;
+        }
+        return commonPoint;
     }
 
-    public List<Street> getEndNeighbour() {
-        return endNeighbour;
-    }
 
     @Override
     public String toString() {
-        return "Street ID: " + streetID;
+        return "Legnumber: "+legNumber+" Street ID: " + streetID;
     }
 
     @Override

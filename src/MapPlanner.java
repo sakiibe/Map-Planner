@@ -14,7 +14,7 @@ public class MapPlanner {
      * @param degrees
      */
     private int degrees;
-    private ArrayList<ArrayList<Leg>> adjacencyList;
+    private ArrayList<ArrayList<Street>> adjacencyList;
     private ArrayList<Street> streets;
     private Map<Point, Integer> points;
     private int legNumber;
@@ -25,7 +25,7 @@ public class MapPlanner {
         this.adjacencyList = new ArrayList<>();
         this.legNumber = 0;
         this.points = new HashMap<>();
-        this.streets=new ArrayList<>();
+        this.streets = new ArrayList<>();
     }
 
     /**
@@ -38,7 +38,7 @@ public class MapPlanner {
     public Boolean depotLocation(Location depot) {
 
         if (streets.contains(depot.getStreetId())) {
-            this.depot=depot;
+            this.depot = depot;
             return true;
         } else {
             return false;
@@ -66,25 +66,45 @@ public class MapPlanner {
             return false;
         }
         //check if street with the same name is already added
-        if (streets.contains(streetId)) {
-            return false;
-        }
-        //if the street already exists with a different name
-        if (points.containsKey(start) && points.containsKey(end)) {
-            return false;
-        }
-        //add street into list
-        Street newStreet= new Street(start,end,streetId, legNumber);
-        adjacencyList.add(new ArrayList<>());
-
         for (Street street:streets){
-            street.getNeighbour(newStreet, adjacencyList);
+            if (street.getStreetID().equals(streetId)){
+                return false;
+            }
+        }
+        //records intersecting points
+        int maxIntersection = 0;
+
+        //create new street
+        Street newStreet = new Street(start, end, streetId, legNumber);
+
+        for (Street street : streets) {
+            int commonIntersection = street.checkNeighbour(newStreet, adjacencyList);
+            if (maxIntersection < commonIntersection) {
+                maxIntersection = commonIntersection;
+            }
         }
 
+        //maxIntersection > 1, the same start and end point is given with different name
+        if (maxIntersection > 1) {
+            return false;
+        }
+        //maxIntersection=0, newStreet isn't connected to this street
+        else if (maxIntersection == 0) {
+            legNumber++;
+            adjacencyList.add(new ArrayList<>());
+        }
+        //maxIntersection = 1, newStreet is connected to this street
+        //add adjacent streets
+        else if (maxIntersection == 1) {
+            legNumber++;
+            adjacencyList.add(new ArrayList<>());
+            for (Street street : streets) {
+                street.addNeighbour(newStreet, adjacencyList);
+            }
+        }
 
         streets.add(newStreet);
         return true;
-
 
     }
 
@@ -106,15 +126,12 @@ public class MapPlanner {
     public Route routeNoLeftTurn(Location destination) {
 
 
-
-
-
         return null;
     }
 
     public Route routeNoLeftTurn(int depot, int destination, ArrayList<Street> streets) {
 
-        int[] distance= new int[legNumber];
+        int[] distance = new int[legNumber];
 
         return null;
 
@@ -123,4 +140,5 @@ public class MapPlanner {
     public ArrayList<Street> getStreetList() {
         return this.streets;
     }
+
 }
