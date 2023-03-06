@@ -35,7 +35,7 @@ public class Point {
      * @param to -- the target destination point to which we want to know the distance
      * @return -- the distance
      */
-    private Double distanceTo( Point to ) {
+    public Double distanceTo( Point to ) {
         Double distance = Math.sqrt( (to.x - this.x)*(to.x - this.x) + (to.y - this.y)*(to.y - this.y));
         return distance;
     }
@@ -76,5 +76,31 @@ public class Point {
         } else {
             return TurnDirection.Right;
         }
+    }
+
+    /**
+     * override equal method
+     * @param comparedObject -- Object being compared
+     * @return -- True if x and y coordinates are the same. Otherwise, false.
+     */
+    @Override
+    public boolean equals(Object comparedObject) {
+        if (this == comparedObject) {
+            return true;
+        }
+        if (!(comparedObject instanceof Point)) {
+            return false;
+        }
+
+        Point comparedTable = (Point) comparedObject;
+
+        //only need to check if x and y are same
+
+        if (this.getX()==((Point) comparedObject).getX()
+        && this.getY()== ((Point) comparedObject).getY()){
+            return true;
+        }
+
+        return false;
     }
 }
