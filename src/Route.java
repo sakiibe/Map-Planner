@@ -10,14 +10,13 @@ import java.util.List;
  */
 public class Route {
 
-    private int degrees;
+    private ArrayList<Leg> legs;
+    private ArrayList<Street> streets;
 
-    private ArrayList<Pair<String,TurnDirection>> currentRoute;
-    private ArrayList<Street> streetList;
+    public Route(ArrayList<Street> streets ){
 
-    public Route( ArrayList<Street> streetList){
-        this.currentRoute= new ArrayList<>();
-        this.streetList= streetList;
+        this.legs=new ArrayList<>();
+        this.streets=streets;
     }
     /**
      * Grow a Route by adding one step (called a "leg") of the route at a time.  This method adds one more
@@ -28,7 +27,7 @@ public class Route {
      */
 
     public Boolean appendTurn( TurnDirection turn, String streetTurnedOnto ) {
-        currentRoute.add(new Pair<>(streetTurnedOnto, turn));
+       legs.add(new Leg(turn,streetTurnedOnto));
         return true;
     }
 
@@ -40,7 +39,7 @@ public class Route {
      * @return -- the street id of the next leg, or null if there is an error.
      */
     public String turnOnto( int legNumber ) {
-        return currentRoute.get(legNumber).getKey();
+        return legs.get(legNumber).getStreetID();
     }
 
     /**
@@ -51,7 +50,7 @@ public class Route {
      * @return -- the turn direction for the leg, or null if there is an error.
      */
     public TurnDirection turnDirection( int legNumber ) {
-        return currentRoute.get(legNumber).getValue();
+        return legs.get(legNumber).getTurn();
     }
 
     /**
@@ -59,7 +58,7 @@ public class Route {
      * @return -- the number of legs in this route.
      */
     public int legs() {
-        return currentRoute.size();
+        return legs.size();
     }
 
     /**
@@ -73,23 +72,7 @@ public class Route {
 
         double length=0.0;
 
-        for (Pair<String,TurnDirection> pair: currentRoute ){
 
-            //capture street object for the current pair
-            Street currentStreet=new Street();
-            for (Street street:streetList){
-                if (street.getStreetID().equals(pair.getKey())){
-                    currentStreet=street;
-                    break;
-                }
-            }
-            //Start and end leg's distance will be half because we start and end at the centre
-            if (currentRoute.indexOf(pair)==0 || currentRoute.indexOf(pair)==legs()){
-                length+=currentStreet.getDistance()/2;
-            } else {
-                length+=currentStreet.getDistance();
-            }
-        }
 
         return 0.0;
     }

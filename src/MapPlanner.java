@@ -1,9 +1,6 @@
 import javafx.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class MapPlanner {
 
@@ -125,16 +122,51 @@ public class MapPlanner {
      */
     public Route routeNoLeftTurn(Location destination) {
 
+        int depotIdx=-1, destinationIdx=-1;
 
+        for (Street street:streets){
+            if (street.getStreetID().equals(depot.getStreetId())){
+                depotIdx=street.getLegNumber();
+            }
+            if (street.getStreetID().equals(destination.getStreetId())){
+                destinationIdx=street.getLegNumber();
+            }
+        }
+        //if either destination or depot isn't on the map, return empty route
+        if (depotIdx*destinationIdx<0){
+            return new Route(this.streets);
+        }
+        Route route= routeNoLeftTurn(depotIdx,destinationIdx,this.adjacencyList, this.depot, destination);
         return null;
     }
 
-    public Route routeNoLeftTurn(int depot, int destination, ArrayList<Street> streets) {
+    public Route routeNoLeftTurn(int depotIdx, int destinationIdx, ArrayList<ArrayList<Street>> adjacencyList, Location depot, Location destination) {
+
+        Route route= new Route(this.streets);
 
         int[] distance = new int[legNumber];
+        //set distance for all adjacent legs to infinity
+        Arrays.fill(distance, Integer.MAX_VALUE);
 
-        return null;
+        PriorityQueue<Street> pq= new PriorityQueue<>((v1,v2)-> (int) (v1.getDistance()- v2.getDistance()));
+        Street depotStreet=new Street();
+        for (Street street:streets){
+            if (street.getLegNumber()==depotIdx){
+                depotStreet=street;
+            }
+        }
+        pq.add(new Street(depotStreet.getStart(),depotStreet.getEnd(),depotStreet.getStreetID(),depotIdx,0));
 
+        while (!pq.isEmpty()){
+            Street currentStreet=pq.poll();
+
+//            for (Street street: adjacencyList.get(currentStreet.getLegNumber())){
+//                if ((distance[currentStreet.getLegNumber()] +
+//                        street.getDistance()< distance[street.getLegNumber()]) &&
+//                ) {
+//            }
+        }
+        return route;
     }
 
     public ArrayList<Street> getStreetList() {

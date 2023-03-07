@@ -21,6 +21,13 @@ public class Street {
         this.distance = start.distanceTo(end);
         this.legNumber = legNumber;
     }
+    public Street(Point start, Point end, String streetID, int legNumber, double distance) {
+        this.start = start;
+        this.end = end;
+        this.streetID = streetID;
+        this.distance = distance;
+        this.legNumber = legNumber;
+    }
 
     public String getStreetID() {
         return streetID;
@@ -92,6 +99,9 @@ public class Street {
         return commonPoint;
     }
 
+    public int getLegNumber() {
+        return legNumber;
+    }
 
     @Override
     public String toString() {
@@ -117,4 +127,5 @@ public class Street {
 
         return false;
     }
+
 }

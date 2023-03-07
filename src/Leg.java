@@ -1,17 +1,17 @@
 public class Leg {
-    private int legNumber;
-    private double distance;
+
     private String streetID;
-    private Point vertex;
     private TurnDirection turn;
-    Leg (int legNumber, double distance, String streetID, Point vertex){
-        this.legNumber=legNumber;
-        this.distance=distance;
-        this.streetID=streetID;
-        this.vertex=vertex;
+    public Leg (TurnDirection turn, String streetTurnedOnto){
+        this.streetID=streetTurnedOnto;
+        this.turn=turn;
     }
 
     public String getStreetID() {
         return streetID;
+    }
+
+    public TurnDirection getTurn() {
+        return turn;
     }
 }
