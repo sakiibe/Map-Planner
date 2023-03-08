@@ -21,6 +21,7 @@ public class Street {
         this.distance = start.distanceTo(end);
         this.legNumber = legNumber;
     }
+
     public Street(Point start, Point end, String streetID, int legNumber, double distance) {
         this.start = start;
         this.end = end;
@@ -46,38 +47,60 @@ public class Street {
     }
 
 
-
-    public void addNeighbour(Street comparedStreet, ArrayList<ArrayList<Street>> adjacencyList ) {
-
+    public void addNeighbour(Street comparedStreet, ArrayList<ArrayList<Edge>> adjacencyList, int degrees) {
+        TurnDirection turn;
         //if the intersection is between this street's start and compared street's start point
-        if (this.start.equals(comparedStreet.getStart())) {
 
-            adjacencyList.get(this.legNumber).add(comparedStreet);
-            adjacencyList.get(comparedStreet.legNumber).add(this);
+        if (this.start.equals(comparedStreet.getStart())) {
+            //add edge from this street to compared street
+            turn = this.end.turnType(start, comparedStreet.end, degrees);
+            adjacencyList.get(this.legNumber).add(new Edge(comparedStreet.legNumber, comparedStreet.getStreetID(), turn, comparedStreet.getDistance()));
+
+            //add edge from compared street to this street
+            turn = comparedStreet.end.turnType(start, this.end, degrees);
+            adjacencyList.get(comparedStreet.legNumber).add(new Edge(this.legNumber, this.getStreetID(),turn, this.getDistance()));
+
         }
         //if the intersection is between this street's start and compared street's end point
         else if (this.start.equals(comparedStreet.getEnd())) {
-            adjacencyList.get(this.legNumber).add(comparedStreet);
-            adjacencyList.get(comparedStreet.legNumber).add(this);
+            //add edge from this street to compared street
+            turn = this.end.turnType(this.start, comparedStreet.start, degrees);
+            adjacencyList.get(this.legNumber).add(new Edge(comparedStreet.legNumber, comparedStreet.getStreetID(), turn, comparedStreet.getDistance()));
+
+            //add edge from compared street to this street
+            turn = comparedStreet.start.turnType(comparedStreet.end, this.end, degrees);
+            adjacencyList.get(comparedStreet.legNumber).add(new Edge(this.legNumber, this.getStreetID(),turn, this.getDistance()));
+
         }
         //if the intersection is between this street's end and compared street's start point
         else if (this.end.equals(comparedStreet.getStart())) {
-            adjacencyList.get(this.legNumber).add(comparedStreet);
-            adjacencyList.get(comparedStreet.legNumber).add(this);
+            //add edge from this street to compared street
+            turn = this.start.turnType(this.end, comparedStreet.end, degrees);
+            adjacencyList.get(this.legNumber).add(new Edge(comparedStreet.legNumber, comparedStreet.getStreetID(), turn, comparedStreet.getDistance()));
+
+            //add edge from compared street to this street
+            turn= comparedStreet.end.turnType(comparedStreet.start, this.start, degrees);
+            adjacencyList.get(comparedStreet.legNumber).add(new Edge(this.legNumber, this.getStreetID(),turn, this.getDistance()));
         }
         //if the intersection is between this street's end and compared street's end point
         else if (this.end.equals(comparedStreet.getEnd())) {
-            adjacencyList.get(this.legNumber).add(comparedStreet);
-            adjacencyList.get(comparedStreet.legNumber).add(this);
+            //add edge from this street to compared street
+            turn= this.start.turnType(this.end,comparedStreet.end, degrees);
+            adjacencyList.get(this.legNumber).add(new Edge(comparedStreet.legNumber, comparedStreet.getStreetID(), turn, comparedStreet.getDistance()));
+
+            //add edge from compared street to this street
+            turn= comparedStreet.start.turnType(comparedStreet.end, this.start, degrees);
+            adjacencyList.get(comparedStreet.legNumber).add(new Edge(this.legNumber, this.getStreetID(),turn, this.getDistance()));
         }
     }
-    public int checkNeighbour(Street comparedStreet, ArrayList<ArrayList<Street>> adjacencyList ) {
+
+    public int checkNeighbour(Street comparedStreet) {
         /* counts common intersection. If,
         commonPoint=0, comparedStreet isn't connected to this street
         commonPoint=1, comparedStreet is connected to this street
         commontPoint>1, the same start and end point is given with different name
          */
-        int commonPoint=0;
+        int commonPoint = 0;
 
         //if the intersection is between this street's start and compared street's start point
         if (this.start.equals(comparedStreet.getStart())) {
@@ -94,7 +117,7 @@ public class Street {
         }
         //if the intersection is between this street's end and compared street's end point
         else if (this.end.equals(comparedStreet.getEnd())) {
-           commonPoint++;
+            commonPoint++;
         }
         return commonPoint;
     }
@@ -105,7 +128,7 @@ public class Street {
 
     @Override
     public String toString() {
-        return "Legnumber: "+legNumber+" Street ID: " + streetID;
+        return "Legnumber: " + legNumber + " Street ID: " + streetID;
     }
 
     @Override

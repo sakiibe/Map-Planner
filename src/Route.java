@@ -12,11 +12,13 @@ public class Route {
 
     private ArrayList<Leg> legs;
     private ArrayList<Street> streets;
+    private int legNumber;
 
     public Route(ArrayList<Street> streets ){
 
         this.legs=new ArrayList<>();
         this.streets=streets;
+        this.legNumber=1;
     }
     /**
      * Grow a Route by adding one step (called a "leg") of the route at a time.  This method adds one more
@@ -27,7 +29,8 @@ public class Route {
      */
 
     public Boolean appendTurn( TurnDirection turn, String streetTurnedOnto ) {
-       legs.add(new Leg(turn,streetTurnedOnto));
+       legs.add(new Leg(turn,streetTurnedOnto, legNumber));
+       legNumber++;
         return true;
     }
 
@@ -72,9 +75,22 @@ public class Route {
 
         double length=0.0;
 
+        for (Leg leg:legs){
+            for (Street street:streets){
+                if (street.getStreetID().equals(leg.getStreetID())){
+                    //if current leg is the depot leg or destination leg, add half distance. Otherwise, add full distance
+                    if (leg.getLegNumber()==1 || legs.indexOf(leg)+1== this.legs.size()){
+                        length+=street.getDistance()/2;
+                    } else {
+                        length+=street.getDistance();
+                    }
+                    break;
+                }
+            }
 
+        }
 
-        return 0.0;
+        return length;
     }
 
     /**
@@ -102,5 +118,11 @@ public class Route {
      */
     public Route simplify() {
         return null;
+    }
+
+    public void printRoute(){
+        for (Leg leg:legs){
+            System.out.println(leg.toString());
+        }
     }
 }

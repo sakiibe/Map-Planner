@@ -11,7 +11,7 @@ public class MapPlanner {
      * @param degrees
      */
     private int degrees;
-    private ArrayList<ArrayList<Street>> adjacencyList;
+    private ArrayList<ArrayList<Edge>> adjacencyList;
     private ArrayList<Street> streets;
     private Map<Point, Integer> points;
     private int legNumber;
@@ -34,12 +34,13 @@ public class MapPlanner {
      */
     public Boolean depotLocation(Location depot) {
 
-        if (streets.contains(depot.getStreetId())) {
-            this.depot = depot;
-            return true;
-        } else {
-            return false;
+        for (Street street:streets){
+            if (depot.getStreetId().equals(street.getStreetID())){
+                this.depot=depot;
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -63,8 +64,8 @@ public class MapPlanner {
             return false;
         }
         //check if street with the same name is already added
-        for (Street street:streets){
-            if (street.getStreetID().equals(streetId)){
+        for (Street street : streets) {
+            if (street.getStreetID().equals(streetId)) {
                 return false;
             }
         }
@@ -74,8 +75,9 @@ public class MapPlanner {
         //create new street
         Street newStreet = new Street(start, end, streetId, legNumber);
 
+        //compute common intersection number
         for (Street street : streets) {
-            int commonIntersection = street.checkNeighbour(newStreet, adjacencyList);
+            int commonIntersection = street.checkNeighbour(newStreet);
             if (maxIntersection < commonIntersection) {
                 maxIntersection = commonIntersection;
             }
@@ -96,7 +98,7 @@ public class MapPlanner {
             legNumber++;
             adjacencyList.add(new ArrayList<>());
             for (Street street : streets) {
-                street.addNeighbour(newStreet, adjacencyList);
+                street.addNeighbour(newStreet, adjacencyList, this.degrees);
             }
         }
 
@@ -122,49 +124,57 @@ public class MapPlanner {
      */
     public Route routeNoLeftTurn(Location destination) {
 
-        int depotIdx=-1, destinationIdx=-1;
+        int depotIdx = -1, destinationIdx = -1;
 
-        for (Street street:streets){
-            if (street.getStreetID().equals(depot.getStreetId())){
-                depotIdx=street.getLegNumber();
+        for (Street street : streets) {
+            if (street.getStreetID().equals(depot.getStreetId())) {
+                depotIdx = street.getLegNumber();
             }
-            if (street.getStreetID().equals(destination.getStreetId())){
-                destinationIdx=street.getLegNumber();
+            if (street.getStreetID().equals(destination.getStreetId())) {
+                destinationIdx = street.getLegNumber();
             }
         }
         //if either destination or depot isn't on the map, return empty route
-        if (depotIdx*destinationIdx<0){
+        if (depotIdx * destinationIdx < 0) {
             return new Route(this.streets);
         }
-        Route route= routeNoLeftTurn(depotIdx,destinationIdx,this.adjacencyList, this.depot, destination);
-        return null;
+        Route route = routeNoLeftTurn(depotIdx, destinationIdx, this.adjacencyList, this.depot, destination);
+        return route;
     }
 
-    public Route routeNoLeftTurn(int depotIdx, int destinationIdx, ArrayList<ArrayList<Street>> adjacencyList, Location depot, Location destination) {
+    private Route routeNoLeftTurn(int depotIdx, int destinationIdx, ArrayList<ArrayList<Edge>> adjacencyList, Location depot, Location destination) {
 
-        Route route= new Route(this.streets);
+        Route route = new Route(this.streets);
 
-        int[] distance = new int[legNumber];
+        double[] distance = new double[legNumber];
         //set distance for all adjacent legs to infinity
         Arrays.fill(distance, Integer.MAX_VALUE);
-
-        PriorityQueue<Street> pq= new PriorityQueue<>((v1,v2)-> (int) (v1.getDistance()- v2.getDistance()));
-        Street depotStreet=new Street();
-        for (Street street:streets){
-            if (street.getLegNumber()==depotIdx){
-                depotStreet=street;
+        distance[depotIdx]=0;
+        PriorityQueue<Edge> pq = new PriorityQueue<>((v1, v2) -> (int) (v1.getDistance() - v2.getDistance()));
+        Street depotStreet = new Street();
+        for (Street street : streets) {
+            if (street.getLegNumber() == depotIdx) {
+                depotStreet = street;
+                break;
             }
         }
-        pq.add(new Street(depotStreet.getStart(),depotStreet.getEnd(),depotStreet.getStreetID(),depotIdx,0));
+        pq.add(new Edge(depotStreet.getLegNumber(), depotStreet.getStreetID(), TurnDirection.Straight, 0));
 
-        while (!pq.isEmpty()){
-            Street currentStreet=pq.poll();
+        while (!pq.isEmpty()) {
+            Edge currentEdge = pq.poll();
 
-//            for (Street street: adjacencyList.get(currentStreet.getLegNumber())){
-//                if ((distance[currentStreet.getLegNumber()] +
-//                        street.getDistance()< distance[street.getLegNumber()]) &&
-//                ) {
-//            }
+            for (Edge edge : adjacencyList.get(currentEdge.getLegNumber())) {
+                if ((distance[currentEdge.getLegNumber()] +
+                        edge.getDistance() < distance[edge.getLegNumber()]) &&
+                        (edge.getTurn() != TurnDirection.Left ||
+                                adjacencyList.get(currentEdge.getLegNumber()).size() == 1)) {
+
+                    route.appendTurn(edge.getTurn(),edge.getStreedID());
+
+                    distance[edge.getLegNumber()]= (edge.getDistance()+ distance[currentEdge.getLegNumber()]);
+                    pq.add(new Edge(edge.getLegNumber(),edge.getStreedID(), edge.getTurn(),edge.getDistance()));
+                }
+            }
         }
         return route;
     }
