@@ -13,7 +13,7 @@ class PointTest {
         Point p4 = new Point( 1, 10 );
         Point p5 = new Point( 1, -10 );
 
-        assertEquals( TurnDirection.Right, origin.turnType( p1, p4, 1 ) );
+        assertEquals( TurnDirection.Right, origin.turnType( p1, p4, -10 ) );
         assertEquals( TurnDirection.Straight, origin.turnType( p1, p4, 20 ) );
         assertEquals( TurnDirection.Right, origin.turnType( p1, p5, 1 ) );
         assertEquals( TurnDirection.UTurn, origin.turnType( p1, p5, 20 ) );

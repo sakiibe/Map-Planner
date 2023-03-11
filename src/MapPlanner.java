@@ -34,9 +34,9 @@ public class MapPlanner {
      */
     public Boolean depotLocation(Location depot) {
 
-        for (Street street:streets){
-            if (depot.getStreetId().equals(street.getStreetID())){
-                this.depot=depot;
+        for (Street street : streets) {
+            if (depot.getStreetId().equals(street.getStreetID())) {
+                this.depot = depot;
                 return true;
             }
         }
@@ -112,7 +112,58 @@ public class MapPlanner {
      * allowing for left turns to get to the street.
      */
     public String furthestStreet() {
-        return null;
+        int depotIdx = -1;
+        Street depotStreet = new Street();
+        //find deport leg number and depot street
+        for (Street street : streets) {
+            if (street.getStreetID().equals(depot.getStreetId())) {
+                depotIdx = street.getLegNumber();
+                depotStreet=street;
+                break;
+            }
+
+        }
+
+        double[] distance = new double[legNumber];
+        //set distance for all adjacent legs to infinity
+        Arrays.fill(distance, Integer.MAX_VALUE);
+        distance[depotIdx] = 0;
+
+        //set priority based on least distance
+        PriorityQueue<Edge> pq = new PriorityQueue<>((v1, v2) -> (int) (v1.getDistance() - v2.getDistance()));
+
+        //add depot edge with 0 distance so it is selected first in the priority queue
+        pq.add(new Edge(depotStreet.getLegNumber(), depotStreet.getStreetID(), TurnDirection.Straight, 0, new Point(0, 0)));
+
+        while (!pq.isEmpty()) {
+            //pick edge with least distance
+            Edge currentEdge = pq.poll();
+
+            //select edge if it satisfies d[u]+c(u,v)<d[v]
+            for (Edge edge : adjacencyList.get(currentEdge.getLegNumber())) {
+                if ((distance[currentEdge.getLegNumber()] +
+                        edge.getDistance() < distance[edge.getLegNumber()])) {
+                    distance[edge.getLegNumber()] = (edge.getDistance() + distance[currentEdge.getLegNumber()]);
+                    pq.add(new Edge(edge.getLegNumber(), edge.getStreedID(), edge.getTurn(), edge.getDistance(), edge.getEntryPoint()));
+                }
+            }
+        }
+
+        int maxIdx = -1;
+        double maxValue = -1;
+        for (int i = 0; i < distance.length; i++) {
+            if (distance[i] > maxValue) {
+                maxValue = distance[i];
+                maxIdx = i;
+            }
+        }
+
+        for (Street street : streets) {
+            if (street.getLegNumber() == maxIdx) {
+                return street.getStreetID();
+            }
+        }
+        return "";
     }
 
     /**
@@ -125,59 +176,119 @@ public class MapPlanner {
     public Route routeNoLeftTurn(Location destination) {
 
         int depotIdx = -1, destinationIdx = -1;
+        Street depotStreet = new Street();
+        Street destinationSreet = new Street();
 
+        //find index and street of depot and destination from their location
         for (Street street : streets) {
             if (street.getStreetID().equals(depot.getStreetId())) {
                 depotIdx = street.getLegNumber();
+                depotStreet = street;
             }
             if (street.getStreetID().equals(destination.getStreetId())) {
                 destinationIdx = street.getLegNumber();
+                destinationSreet = street;
             }
         }
         //if either destination or depot isn't on the map, return empty route
         if (depotIdx * destinationIdx < 0) {
             return new Route(this.streets);
         }
-        Route route = routeNoLeftTurn(depotIdx, destinationIdx, this.adjacencyList, this.depot, destination);
-        return route;
-    }
-
-    private Route routeNoLeftTurn(int depotIdx, int destinationIdx, ArrayList<ArrayList<Edge>> adjacencyList, Location depot, Location destination) {
-
+        //initialize route
         Route route = new Route(this.streets);
 
         double[] distance = new double[legNumber];
         //set distance for all adjacent legs to infinity
         Arrays.fill(distance, Integer.MAX_VALUE);
-        distance[depotIdx]=0;
+        distance[depotIdx] = 0;
+
+        //set priority based on least distance
         PriorityQueue<Edge> pq = new PriorityQueue<>((v1, v2) -> (int) (v1.getDistance() - v2.getDistance()));
-        Street depotStreet = new Street();
+
+        //find dest
         for (Street street : streets) {
-            if (street.getLegNumber() == depotIdx) {
-                depotStreet = street;
-                break;
-            }
+
         }
-        pq.add(new Edge(depotStreet.getLegNumber(), depotStreet.getStreetID(), TurnDirection.Straight, 0));
+        //add depot edge with 0 distance so it is selected first in the priority queue
+        pq.add(new Edge(depotStreet.getLegNumber(), depotStreet.getStreetID(), TurnDirection.Straight, 0, new Point(0, 0)));
 
         while (!pq.isEmpty()) {
+            //pick edge with least distance
             Edge currentEdge = pq.poll();
 
+            //if we reach destination street
+            if (currentEdge.getStreedID().equals(destination.getStreetId())) {
+                route.appendTurn(currentEdge.getTurn(), currentEdge.getStreedID());
+                //get street associated with this current edge
+                Street currentStreet = new Street();
+                for (Street street : streets) {
+                    if (street.getStreetID().equals(currentEdge.getStreedID())) {
+                        currentStreet = street;
+                    }
+                }
+
+                //we enter the street from its start point
+                if (currentEdge.getEntryPoint().equals(destinationSreet.getStart())) {
+
+                    //we entered through start point, street side of destination will remain the same
+                    if (depot.getStreetSide().equals(destination.getStreetSide())) {
+                        return route;
+                    }
+                    //location is on the other side of the street, see if u-turn is possible
+                    else if (currentStreet.getEndNeighbour().size() == 0) {
+                        //append u-turn
+                        route.appendTurn(TurnDirection.UTurn, currentEdge.getStreedID());
+                        return route;
+                    }
+                    //reaching this else statement means that the current location is unreachable. At which case, it would return the route until
+                    //the destination street, but on the opposite street side. At which case the driver would have to park vehicle and cross the
+                    //street.
+                    else {
+                        return route;
+                    }
+                }
+
+                //we enter the street from it's end point
+                else if (currentEdge.getEntryPoint().equals(destinationSreet.getEnd()) ) {
+                    //if we enter the street from its end point, street side of destination will be flipped
+                    if (!depot.getStreetSide().equals(destination.getStreetSide())) {
+                        return route;
+                    }
+                    //location is on the other side of the street, see if u-turn is possible
+                    else if (currentStreet.getStartNeighbour().size()==0){
+                        route.appendTurn(TurnDirection.UTurn, currentEdge.getStreedID());
+                        return route;
+                    }
+                    //reaching this else statement means that the current location is unreachable. At which case, it would return the route until
+                    //the destination street, but on the opposite street side. At which case the driver would have to park vehicle and cross the
+                    //street.
+                    else {
+                        return route;
+                    }
+                }
+
+            }
+
+            //select edge if it satisfies d[u]+c(u,v)<d[v] and if that edge isn't on the left side.
+            //only take left side if the only direction available is left
             for (Edge edge : adjacencyList.get(currentEdge.getLegNumber())) {
                 if ((distance[currentEdge.getLegNumber()] +
                         edge.getDistance() < distance[edge.getLegNumber()]) &&
                         (edge.getTurn() != TurnDirection.Left ||
                                 adjacencyList.get(currentEdge.getLegNumber()).size() == 1)) {
+                    if (route.getLegList().size()==0){
+                        route.appendTurn(edge.getTurn(), depotStreet.getStreetID());
+                    }
+                    route.appendTurn(edge.getTurn(), edge.getStreedID());
 
-                    route.appendTurn(edge.getTurn(),edge.getStreedID());
-
-                    distance[edge.getLegNumber()]= (edge.getDistance()+ distance[currentEdge.getLegNumber()]);
-                    pq.add(new Edge(edge.getLegNumber(),edge.getStreedID(), edge.getTurn(),edge.getDistance()));
+                    distance[edge.getLegNumber()] = (edge.getDistance() + distance[currentEdge.getLegNumber()]);
+                    pq.add(new Edge(edge.getLegNumber(), edge.getStreedID(), edge.getTurn(), edge.getDistance(), edge.getEntryPoint()));
                 }
             }
         }
         return route;
     }
+
 
     public ArrayList<Street> getStreetList() {
         return this.streets;

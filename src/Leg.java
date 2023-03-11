@@ -1,5 +1,8 @@
-public class Leg {
+/**
+ * capture a leg for a route
+ */
 
+public class Leg {
     private String streetID;
     private TurnDirection turn;
     private int legNumber;
@@ -9,14 +12,26 @@ public class Leg {
         this.legNumber=legNumber;
     }
 
+    /**
+     * get street name of the leg
+     * @return -- street id of leg
+     */
     public String getStreetID() {
         return streetID;
     }
 
+    /**
+     * Get turn direction of the leg
+     * @return - turn direction of leg
+     */
     public TurnDirection getTurn() {
         return turn;
     }
 
+    /**
+     * get leg number of the leg
+     * @return leg number of leg
+     */
     public int getLegNumber() {
         return legNumber;
     }
@@ -26,6 +41,7 @@ public class Leg {
         return "Leg{" +
                 "streetID='" + streetID + '\'' +
                 ", turn=" + turn +
+                ", legNumber=" + legNumber +
                 '}';
     }
 }

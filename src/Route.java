@@ -1,5 +1,3 @@
-import javafx.util.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +40,7 @@ public class Route {
      * @return -- the street id of the next leg, or null if there is an error.
      */
     public String turnOnto( int legNumber ) {
-        return legs.get(legNumber).getStreetID();
+        return legs.get(legNumber-1).getStreetID();
     }
 
     /**
@@ -53,7 +51,7 @@ public class Route {
      * @return -- the turn direction for the leg, or null if there is an error.
      */
     public TurnDirection turnDirection( int legNumber ) {
-        return legs.get(legNumber).getTurn();
+        return legs.get(legNumber-1).getTurn();
     }
 
     /**
@@ -74,7 +72,7 @@ public class Route {
     public Double length() {
 
         double length=0.0;
-
+        //extract distance out of list of street for legs in this route
         for (Leg leg:legs){
             for (Street street:streets){
                 if (street.getStreetID().equals(leg.getStreetID())){
@@ -107,7 +105,21 @@ public class Route {
      * share a common interesection.
      */
     public List<SubRoute> loops() {
-        return null;
+        List<SubRoute> loops= new ArrayList<>();
+        Route route= new Route(this.streets);
+        for (Leg leg:legs){
+            //if route does not reach the same leg, grow the route
+            if (!route.getLegList().contains(leg)){
+                route.appendTurn(leg.getTurn(),leg.getStreetID());
+            }
+            //if it reaches a common intersection, instantiate a new subroute with it's start and end leg and append it to list of loops
+            else {
+                loops.add(new SubRoute(route, route.getLegList().get(0).getLegNumber(), route.getLegList().get(getLegList().size()-1).getLegNumber()));
+                route=new Route(this.streets);
+            }
+        }
+
+        return loops;
     }
 
     /**
@@ -117,7 +129,32 @@ public class Route {
      * @return -- the simplified route.
      */
     public Route simplify() {
-        return null;
+
+        Route simpleRoute= new Route(this.streets);
+        //add all legs except legs containing straight turns
+        for (Leg leg:legs){
+            if (!leg.getTurn().equals(TurnDirection.Straight)){
+                simpleRoute.appendTurn(leg.getTurn(),leg.getStreetID());
+            }
+        }
+
+        return simpleRoute;
+    }
+
+    /**
+     * get the legs of this route
+     * @return -- Arraylist of legs of this route
+     */
+    public ArrayList<Leg> getLegList() {
+        return legs;
+    }
+
+    /**
+     * get streets in the map
+     * @return -- Arraylist of streets of the map
+     */
+    public ArrayList<Street> getStreetList() {
+        return streets;
     }
 
     public void printRoute(){
