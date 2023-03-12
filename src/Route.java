@@ -40,6 +40,10 @@ public class Route {
      * @return -- the street id of the next leg, or null if there is an error.
      */
     public String turnOnto( int legNumber ) {
+        if (legNumber==0 || legNumber>legs.size()){
+            return null;
+        }
+
         return legs.get(legNumber-1).getStreetID();
     }
 
@@ -51,6 +55,10 @@ public class Route {
      * @return -- the turn direction for the leg, or null if there is an error.
      */
     public TurnDirection turnDirection( int legNumber ) {
+
+        if (legNumber==0 || legNumber>legs.size()){
+            return null;
+        }
         return legs.get(legNumber-1).getTurn();
     }
 
