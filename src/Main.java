@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
         Point p1 = new Point(15, 15);
         Point p2 = new Point(15, 30);
-        Point p3 = new Point(15, 0);
+        Point p3 = new Point(15, 70);
         Point p4 = new Point(15, -15);
         Point p5 = new Point(5, 5);
         Point p6 = new Point(5, -10);
@@ -27,14 +27,14 @@ public class Main {
         mapPlanner.addStreet("Dhanmondi", p3, p1);
         mapPlanner.addStreet("Taltola", p4, p3);
         mapPlanner.addStreet("Agargoan", p3, p5);
-//        mapPlanner.addStreet("A", p5, p6);
-//        mapPlanner.addStreet("B", p3, p5);
-//        mapPlanner.addStreet("C", p6, p4);
-//        mapPlanner.addStreet("D", p6, p7);
-//        mapPlanner.addStreet("E", p5, p10);
-//        mapPlanner.addStreet("F", p10, p15);
-//        mapPlanner.addStreet("G", p10, p11);
-//        mapPlanner.addStreet("H", p11, p7);
+        mapPlanner.addStreet("A", p5, p6);
+        mapPlanner.addStreet("B", p3, p5);
+        mapPlanner.addStreet("C", p6, p4);
+        mapPlanner.addStreet("D", p6, p7);
+        mapPlanner.addStreet("E", p5, p10);
+        mapPlanner.addStreet("F", p10, p15);
+        mapPlanner.addStreet("G", p10, p11);
+        mapPlanner.addStreet("H", p11, p7);
 //        for (Street s:mapPlanner.getStreetList()){
 //
 //            System.out.println(s.getDistance());

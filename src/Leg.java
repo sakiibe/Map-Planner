@@ -38,10 +38,6 @@ public class Leg {
 
     @Override
     public String toString() {
-        return "Leg{" +
-                "streetID='" + streetID + '\'' +
-                ", turn=" + turn +
-                ", legNumber=" + legNumber +
-                '}';
+        return "turn "+getTurn()+" on "+getStreetID();
     }
 }

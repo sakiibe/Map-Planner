@@ -1,5 +1,3 @@
-import javafx.util.Pair;
-
 import java.util.*;
 
 public class MapPlanner {
@@ -289,7 +287,10 @@ public class MapPlanner {
         return route;
     }
 
-
+    /**
+     * get list of streets in the map
+     * @return -- arraylist of streets
+     */
     public ArrayList<Street> getStreetList() {
         return this.streets;
     }
